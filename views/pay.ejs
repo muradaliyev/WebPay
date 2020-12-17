@@ -44,6 +44,7 @@
             <input type="hidden" name="wsb_customer_id" value="<%= calc.clientId %>">
 
             <!-- Recurring bind - currently disabled by provider -->
+            
             <% if (form.paymentType.value =='recurring') { %>
                 <input type="hidden" name="wsb_operation_type" value="recurring_bind">
             <% }; %>                

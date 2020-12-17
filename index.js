@@ -1,7 +1,12 @@
+// Modules
+
 const cryptoRandomString = require('crypto-random-string');
 const crypto = require('crypto');
-
+const express = require('express');
+const app = express();
 require('dotenv').config();
+
+// static constants
 
 const store = {
     storeId: process.env.STORE_ID,
@@ -34,14 +39,17 @@ const languages = ["russian", "english"]
 
 const staticValues = { currencies, store, plans, paymentTypes, languages };
 
-const express = require('express');
-const app = express();
 const port = 80;
 
+// init engine
+
 app.set('view engine', 'ejs');
+
 app.use(express.urlencoded({
     extended: true
 }));
+
+// contollers
 
 app.get(['/', '/order'], (req, res) => {
     res.render('order', { stat: staticValues, error: null, form: {} });
@@ -82,10 +90,13 @@ app.post('/order', (req, res) => {
 });
 
 /* Notify not implemented */
+
 app.post('/notify', (req, res) => {
     res.send(JSON.stringify(req.body));
 });
 
+// start server
+
 app.listen(port, () => {
-    console.log(`WebPay app listening at http://localhost:${port}`);
+    console.log(`Listening on port: ${port}`);
 });
