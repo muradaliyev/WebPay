@@ -1,0 +1,54 @@
+<html>
+    <head></head>
+    <body>
+        <h2><%= form.plan.amount %> <%= form.currency.value %> donation from <%= form.firstName %> <%= form.lastName %></h2>
+        <form action="<%= stat.store.gatewayUrl %>/" method="post">
+            <input type="hidden" name="*scart">
+            <input type="hidden" name="wsb_version" value="2">
+            <input type="hidden" name="wsb_language_id" value="<%= form.language %>">
+            <input type="hidden" name="wsb_storeid" value="<%= stat.store.storeId %>">
+            <input type="hidden" name="wsb_store" value="<%= stat.store.storeName %>">
+            <input type="hidden" name="wsb_order_num" value="<%= calc.orderId %>">
+            <input type="hidden" name="wsb_test" value="<%= stat.store.isTest %>">
+            <input type="hidden" name="wsb_currency_id" value="<%= form.currency.value %>">
+            <input type="hidden" name="wsb_seed" value="<%= calc.seed %>">
+            <input type="hidden" name="wsb_signature" value="<%= calc.signature %>">
+            <input type="hidden" name="wsb_customer_name" value="<%= form.firstName %> <%= form.lastName %>">
+            <input type="hidden" name="wsb_customer_address" value="<%= form.address %>">
+
+            <!-- 
+                <input type="hidden" name="wsb_service_date" value="Доставка до 1 января 2016 года"> 
+                <input type="hidden" name="wsb_return_url" value="http://yoursiteurl.com/success.php">
+                <input type="hidden" name="wsb_cancel_return_url" value="http://yoursiteurl.com/cancel.php">
+            -->
+            
+            <!-- Notify not implemented
+                <input type="hidden" name="wsb_notify_url" value="http://yoursiteurl.com/notify.php">
+            -->
+            
+            <input type="hidden" name="wsb_email" value="<%= form.email %>">
+            <input type="hidden" name="wsb_phone" value="<%= form.phone %>">
+            <input type="hidden" name="wsb_invoice_item_name[0]" value="<%= form.plan.value %> <%= form.currency.name %> donation">
+            <input type="hidden" name="wsb_invoice_item_quantity[0]" value="1">
+            <input type="hidden" name="wsb_invoice_item_price[0]" value="<%= form.plan.amount %>">
+            <input type="hidden" name="wsb_total" value="<%= form.plan.amount %>">
+            <!-- 
+                <input type="hidden" name="wsb_tax" value="0">
+                <input type="hidden" name="wsb_shipping_name" value="Стоимость доставки">
+                <input type="hidden" name="wsb_shipping_price" value="0.98">
+                <input type="hidden" name="wsb_discount_name" value="Скидка на товар">
+                <input type="hidden" name="wsb_discount_price" value="0.58">
+                <input type="hidden" name="wsb_order_contract" value="Договор №152/12-1 от 12.01.19"> 
+            -->
+
+            <input type="hidden" name="wsb_customer_id" value="<%= calc.clientId %>">
+
+            <!-- Recurring bind - currently disabled by provider -->
+            <% if (form.paymentType.value =='recurring') { %>
+                <input type="hidden" name="wsb_operation_type" value="recurring_bind">
+            <% }; %>                
+
+            <input type="submit" value="Pay">
+          </form>
+    </body>
+</html>

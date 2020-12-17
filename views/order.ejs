@@ -1,0 +1,74 @@
+<html>
+
+<head></head>
+
+<body>
+    <% if (locals.error) { %>
+        <h4>Error: <%= error %>
+        </h4>
+        <% } %>
+
+            <h3>Donate</h3>
+
+            <form action="order" method="POST">
+                <label for="firstName">First name*:</label><br>
+                <input type="text" id="firstName" name="firstName" value="<%= form.firstName %>"><br><br>
+                <label for="lastName">Last name*:</label><br>
+                <input type="text" id="lastName" name="lastName" value="<%= form.lastName %>"><br><br>
+                <label for="address">Address:</label><br>
+                <input type="text" id="address" name="address" value="<%= form.address %>"><br><br>
+
+                <label for="email">Email*:</label><br>
+                <input type="text" id="email" name="email" value="<%= form.email %>"><br><br>
+
+                <label for="phone">Phone:</label><br>
+                <input type="text" id="phone" name="phone" value="<%= form.phone %>"><br><br>
+
+                <label for="currency">Currency:</label><br>
+
+                <select id="currency" name="currency">
+                    <% stat.currencies.forEach((currency)=> { %>
+                        <option value="<%= currency.value %>" <%= (currency.value === form.currency) && 'selected' %> >
+                            <%= currency.name %>
+                        </option>
+                        <% }); %>
+                </select><br><br>
+
+                <p>Amount*:</p>
+
+                <% stat.plans.forEach((plan)=> { %>
+                    <input type="radio" id="<%= plan.value %>" name="amount" value="<%= plan.value %>" <%= (plan.value === form.amount) && 'checked="selected"' %>>
+
+                    <label for="<%= plan.value %>">
+                        <%= plan.value %>
+                    </label>
+                <% }); %>
+                <br><br>
+
+                <% stat.paymentTypes.forEach((pt)=> { %>
+                    <input type="radio" id="<%= pt.value %>" name="paymentType" value="<%= pt.value %>" <%= (pt.value === form.paymentType) && 'checked="selected"' %>>
+
+                    <label for="<%= pt.value %>">
+                        <%= pt.name %>
+                    </label>
+                <% }); %>
+                <br><br>
+
+
+                <label for="language">Language:</label><br>
+
+                <select id="language" name="language">
+                    <% stat.languages.forEach((language)=> { %>
+                        <option value="<%= language %>" <%= (language.value === form.language) && 'selected' %>>
+                            <%= language %>
+                        </option>
+                        <% }); %>
+                </select><br><br>
+
+                <p>
+                    <input type="submit" value="Proceed to payment">
+                </p>
+            </form>
+</body>
+
+</html>
