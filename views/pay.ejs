@@ -22,9 +22,9 @@
                 <input type="hidden" name="wsb_cancel_return_url" value="http://yoursiteurl.com/cancel.php">
             -->
             
-            <!-- Notify not implemented
-                <input type="hidden" name="wsb_notify_url" value="http://yoursiteurl.com/notify.php">
-            -->
+
+            <input type="hidden" name="wsb_notify_url" value="<%= stat.store.notifyUrl %>">
+
             
             <input type="hidden" name="wsb_email" value="<%= form.email %>">
             <input type="hidden" name="wsb_phone" value="<%= form.phone %>">

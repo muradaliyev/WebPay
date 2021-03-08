@@ -4,7 +4,16 @@ const cryptoRandomString = require('crypto-random-string');
 const crypto = require('crypto');
 const express = require('express');
 const app = express();
+const randomName = require('random-name')
 require('dotenv').config();
+const sql = require('mssql')
+
+const sqlConfig = {
+    user: process.env.SQL_USER,
+    password: process.env.SQL_PASSWORD,
+    server: process.env.SQL_SERVER,
+    database: process.env.SQL_DB,
+}
 
 // static constants
 
@@ -12,6 +21,7 @@ const store = {
     storeId: process.env.STORE_ID,
     storeName: process.env.STORE_NAME,
     storeSecretKey: process.env.STORE_SECRET,
+    notifyUrl: process.env.NOTIFY_URL,
     Version: '2',
     isTest: '1',
     gatewayUrl: 'https://securesandbox.webpay.by'
@@ -52,10 +62,14 @@ app.use(express.urlencoded({
 // contollers
 
 app.get(['/', '/order'], (req, res) => {
-    res.render('order', { stat: staticValues, error: null, form: {} });
+    let firstName = randomName.first();
+    let lastName = randomName.last();
+    let email = `${firstName}.${lastName}@example.com`
+    res.render('order', { stat: staticValues, error: null, form: { firstName, lastName, email } });
 });
 
 app.post('/order', (req, res) => {
+
 
     let currency = staticValues.currencies.find(c => c.value === req.body['currency']);
     let plan = staticValues.plans.find(c => c.value === req.body['amount']);
@@ -71,22 +85,36 @@ app.post('/order', (req, res) => {
         return res.render('order', { stat: staticValues, error: 'Mandatory fields are missing', form: req.body });
     }
 
-    let clientId = `${firstName} ${lastName}`.replace(' ', '.');
+    let clientId = cryptoRandomString({ length: 10 });//`${firstName} ${lastName}`.replace(' ', '.');
     let orderId = `order_${clientId}_${Date.now()}`;
     let seed = cryptoRandomString({ length: 10 });
 
+    let sigData = (paymentType.value == 'recurring') ?
+        `${seed}${store.storeId}${clientId}${orderId}${store.isTest}${currency.value}${plan.amount}recurring_bind${store.storeSecretKey}`
+        :
+        `${seed}${store.storeId}${clientId}${orderId}${store.isTest}${currency.value}${plan.amount}${store.storeSecretKey}`
 
-    let signature = crypto
-        .createHash('sha1')
-        .update(`${seed}${store.storeId}${clientId}${orderId}${store.isTest}${currency.value}${plan.amount}${store.storeSecretKey}`)
-        .digest("hex");
+
+    let signature = crypto.createHash('sha1').update(sigData).digest("hex");
+
+    sql
+        .connect(sqlConfig)
+        .then(pool => {
+            const form = { firstName, lastName, address, currency, plan, language, email, phone, paymentType, birthday: randomDate(new Date(1960, 0, 1), new Date(1985, 11, 31)) };
+            const calc = { clientId, orderId, seed, signature };
+            pool.request()
+                .input('data', sql.NVarChar(2048), JSON.stringify({ ...form, ...calc }))
+                .query("insert into common.Log ([LogType],[LogData]) select 'webpay.order', @data")
+                .then(result => {
+                    res.render('pay', {
+                        form,
+                        stat: staticValues,
+                        calc
+                    });
+                });
+        })
 
 
-    res.render('pay', {
-        form: { firstName, lastName, address, currency, plan, language, email, phone, paymentType },
-        stat: staticValues,
-        calc: { clientId, orderId, seed, signature }
-    });
 });
 
 /* Notify not implemented */
@@ -100,3 +128,7 @@ app.post('/notify', (req, res) => {
 app.listen(port, () => {
     console.log(`Listening on port: ${port}`);
 });
+
+function randomDate(start, end) {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
